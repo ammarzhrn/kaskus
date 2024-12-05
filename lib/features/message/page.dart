@@ -10,7 +10,7 @@ class MessagePage extends StatelessWidget {
       child: Text(
         'Message Page',
         style: TextStyle(
-          color: Colors.white,
+          color: Color(0xff383838),
         ),
       ),
     );

@@ -10,7 +10,7 @@ class FavoritePage extends StatelessWidget {
       child: Text(
         'Favorite Page',
         style: TextStyle(
-          color: Colors.white,
+          color: Color(0xff383838),
         ),
       ),
     );

@@ -10,7 +10,7 @@ class ProfilePage extends StatelessWidget {
       child: Text(
         'Profile Page',
         style: TextStyle(
-          color: Colors.white,
+          color: Color(0xff383838),
         ),
       ),
     );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kaskus/features/home/pages/index/page.dart';
 import 'package:kaskus/features/auth/register.dart';
-import 'package:kaskus/features/auth/login.dart';
+import 'package:kaskus/features/auth/pages/login.dart';
 
 import '../../main.dart';
 

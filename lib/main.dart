@@ -1,8 +1,13 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kaskus/features/favorite/page.dart';
 import 'package:kaskus/features/message/page.dart';
 import 'package:kaskus/features/profile/page.dart';
 import 'package:kaskus/features/home/pages/index/page.dart';
 import 'package:kaskus/features/splashscreen/page.dart';
+import 'package:kaskus/data/dataresource/auth_local_datasource.dart';
+import 'package:kaskus/data/dataresource/auth_remote_datasource.dart';
+import 'package:kaskus/features/auth/blocs/login_bloc.dart';
+import 'package:kaskus/features/home/blocs/logout/logout_bloc.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'preferences/preferences.dart';
@@ -15,23 +20,48 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xffffffff),
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
-        useMaterial3: true,
-        fontFamily: GoogleFonts.inter().fontFamily,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => LoginBloc(AuthRemoteDatasource()),
+        ),
+        BlocProvider(
+          create: (context) => LogoutBloc(AuthRemoteDatasource()),
+        ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          scaffoldBackgroundColor: const Color(0xffffffff),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
+          useMaterial3: true,
+          fontFamily: GoogleFonts.inter().fontFamily,
+        ),
+        home: FutureBuilder<bool>(
+          future: AuthLocalDatasource().isAuthData(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError) {
+              return const Center(child: Text('Something went wrong.'));
+            }
+
+            if (snapshot.hasData && snapshot.data == true) {
+              return const HomePage();
+            } else {
+              return const SplashScreen();
+            }
+          },
+        ),
       ),
-      home: const SplashScreen(),
     );
   }
 }
-
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -41,21 +71,9 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-
   int selectedIndex = 0;
 
-  IconButton buildItemNav(IconData icon, int index) {
-    return IconButton(
-      onPressed: () {
-        setState(() {
-          selectedIndex = index;
-        });
-      },
-      icon: Icon(icon, color: selectedIndex == index ? const Color(0xff6C5ECF) : const Color(0xff808191),),
-    );
-  }
-
-  List<Widget> pages = const [
+  final List<Widget> pages = const [
     HomePage(),
     MessagePage(),
     MessagePage(),
@@ -71,21 +89,21 @@ class _MainPageState extends State<MainPage> {
         decoration: const BoxDecoration(
           border: Border(
             top: BorderSide(
-                color: Color(0xffe5e5e5),
-                width: 1.0), // Customize border color and width
+              color: Color(0xffe5e5e5),
+              width: 1.0,
+            ),
           ),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 5),
           child: SalomonBottomBar(
             currentIndex: selectedIndex,
-            onTap: (index){
+            onTap: (index) {
               setState(() {
                 selectedIndex = index;
               });
             },
             items: [
-              /// Home
               SalomonBottomBarItem(
                 icon: const Icon(
                   CustomIcon.home,
@@ -98,8 +116,6 @@ class _MainPageState extends State<MainPage> {
                 ),
                 selectedColor: Colors.grey,
               ),
-
-              /// Chat
               SalomonBottomBarItem(
                 icon: const Icon(
                   CustomIcon.message,
@@ -112,8 +128,6 @@ class _MainPageState extends State<MainPage> {
                 ),
                 selectedColor: Colors.grey,
               ),
-
-              /// Shop
               SalomonBottomBarItem(
                 icon: const Icon(
                   Icons.shopping_bag,
@@ -126,8 +140,6 @@ class _MainPageState extends State<MainPage> {
                 ),
                 selectedColor: Colors.grey,
               ),
-
-              /// Wishlist
               SalomonBottomBarItem(
                 icon: const Icon(
                   CustomIcon.favorite,
@@ -140,8 +152,6 @@ class _MainPageState extends State<MainPage> {
                 ),
                 selectedColor: Colors.grey,
               ),
-
-              /// Profile
               SalomonBottomBarItem(
                 icon: const Icon(
                   CustomIcon.profile,
